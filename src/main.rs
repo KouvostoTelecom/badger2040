@@ -9,6 +9,8 @@
 #![no_std]
 #![no_main]
 
+use fugit::RateExtU32;
+
 use pimoroni_badger2040::entry;
 // Ensure we halt the program on panic (if we don't mention this crate it won't
 // be linked)
@@ -25,6 +27,11 @@ use pimoroni_badger2040::hal::pac;
 // Some traits we need
 use embedded_hal::digital::v2::OutputPin;
 use rp2040_hal::clocks::Clock;
+
+use rp2040_hal::gpio::FunctionSpi;
+//use rp2040_hal::spi::Spi;
+
+use uc8151::Uc8151;
 
 /// The linker will place this boot block at the start of our program image. We
 /// need this to help the ROM bootloader get our code up and running.
@@ -72,6 +79,26 @@ fn main() -> ! {
         sio.gpio_bank0,
         &mut pac.RESETS,
     );
+
+    let _sclk = pins.gpio18.into_mode::<FunctionSpi>(); // sclk
+    let _miso = pins.gpio16.into_mode::<FunctionSpi>(); // miso
+    let _mosi = pins.gpio19.into_mode::<FunctionSpi>(); // mosi
+    let spi_cs = pins.gpio17.into_push_pull_output();
+
+    let spi = hal::Spi::<_, _, 8>::new(pac.SPI0);
+
+    let spi = spi.init(
+        &mut pac.RESETS,
+        clocks.peripheral_clock.freq(),
+        2_500_000u32.Hz(),
+        &embedded_hal::spi::MODE_3,
+    );
+ 
+    let mut dc_pin = pins.gpio20.into_push_pull_output();
+    let mut busy_pin = pins.gpio26.into_bus_keep_input();
+    let mut reset_pin = pins.gpio21.into_push_pull_output();
+
+    let mut display = Uc8151::new(spi, spi_cs, dc_pin, busy_pin, reset_pin);
 
     // Configure GPIO25 as an output
     let mut led_pin = pins.gpio25.into_push_pull_output();
