@@ -9,16 +9,18 @@
 #![no_std]
 #![no_main]
 
+use pimoroni_badger2040::entry;
 // Ensure we halt the program on panic (if we don't mention this crate it won't
 // be linked)
 use panic_halt as _;
 
 // Alias for our HAL crate
-use rp2040_hal as hal;
+use pimoroni_badger2040::hal;
 
 // A shorter alias for the Peripheral Access Crate, which provides low-level
 // register access
-use hal::pac;
+use pimoroni_badger2040::hal::pac;
+//use pimoroni_badger2040::hal::Timer;
 
 // Some traits we need
 use embedded_hal::digital::v2::OutputPin;
@@ -28,22 +30,15 @@ use rp2040_hal::clocks::Clock;
 /// need this to help the ROM bootloader get our code up and running.
 /// Note: This boot block is not necessary when using a rp-hal based BSP
 /// as the BSPs already perform this step.
-#[link_section = ".boot2"]
-#[used]
-pub static BOOT2: [u8; 256] = rp2040_boot2::BOOT_LOADER_GENERIC_03H;
+//#[link_section = ".boot2"]
+//#[used]
+//pub static BOOT2: [u8; 256] = rp2040_boot2::BOOT_LOADER_GENERIC_03H;
 
 /// External high-speed crystal on the Raspberry Pi Pico board is 12 MHz. Adjust
 /// if your board has a different frequency
 const XTAL_FREQ_HZ: u32 = 12_000_000u32;
 
-/// Entry point to our bare-metal application.
-///
-/// The `#[rp2040_hal::entry]` macro ensures the Cortex-M start-up code calls this function
-/// as soon as all global variables and the spinlock are initialised.
-///
-/// The function configures the RP2040 peripherals, then toggles a GPIO pin in
-/// an infinite loop. If there is an LED connected to that pin, it will blink.
-#[rp2040_hal::entry]
+#[entry]
 fn main() -> ! {
     // Grab our singleton objects
     let mut pac = pac::Peripherals::take().unwrap();

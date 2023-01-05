@@ -34,4 +34,6 @@ rp2040-boot2 = "0.2.1"
 hd44780-driver = "0.4.0"
 pio-proc = "0.2.0"
 dht-sensor = "0.2.1"
+uc8151 = "0.1.4"
+pimoroni_badger2040 = "0.3.0"
 
