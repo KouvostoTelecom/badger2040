@@ -109,7 +109,7 @@ fn main() -> ! {
         &mut pac.RESETS,
         clocks.peripheral_clock.freq(),
         2_500_000u32.Hz(),
-        &embedded_hal::spi::MODE_1,
+        &embedded_hal::spi::MODE_0,
     );
  
     let mut dc_pin = pins.gpio20.into_push_pull_output();
