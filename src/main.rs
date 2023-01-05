@@ -45,6 +45,24 @@ use uc8151::Uc8151;
 /// if your board has a different frequency
 const XTAL_FREQ_HZ: u32 = 12_000_000u32;
 
+
+use embedded_graphics::{
+    image::{Image, ImageRaw},
+    pixelcolor::BinaryColor,
+    prelude::*,
+};
+
+
+#[rustfmt::skip]
+const DATA: &[u8] = &[
+    0b11001011, 0b1110_0000,
+    0b10101010, 0b0100_0000,
+    0b10101011, 0b0100_0000,
+    0b10101001, 0b0100_0000,
+    0b11001011, 0b0100_0000,
+];
+
+
 #[entry]
 fn main() -> ! {
     // Grab our singleton objects
@@ -91,7 +109,7 @@ fn main() -> ! {
         &mut pac.RESETS,
         clocks.peripheral_clock.freq(),
         2_500_000u32.Hz(),
-        &embedded_hal::spi::MODE_0,
+        &embedded_hal::spi::MODE_1,
     );
  
     let mut dc_pin = pins.gpio20.into_push_pull_output();
@@ -102,6 +120,9 @@ fn main() -> ! {
     
     display.enable();
     display.setup(&mut delay, uc8151::LUT::Normal);
+
+    let raw_image = ImageRaw::<BinaryColor>::new(DATA, 12);
+    let image = Image::new(&raw_image, Point::zero());
 
     // Configure GPIO25 as an output
     let mut led_pin = pins.gpio25.into_push_pull_output();
@@ -122,12 +143,14 @@ fn main() -> ! {
         led_pin.set_low().unwrap();
         for y in 0..100 {
             for x in 0..100 {
-                display.pixel(x,y,false);
+                display.pixel(x,y,true);
             }
         }
-        delay.delay_ms(100);
+        
+        image.draw(&mut display).unwrap();
+
         display.update().unwrap();
-        delay.delay_ms(10000);
+        delay.delay_ms(20000);
     }
 }
 
