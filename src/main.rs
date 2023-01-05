@@ -22,7 +22,7 @@ use pimoroni_badger2040::hal;
 // A shorter alias for the Peripheral Access Crate, which provides low-level
 // register access
 use pimoroni_badger2040::hal::pac;
-//use pimoroni_badger2040::hal::Timer;
+use pimoroni_badger2040::hal::Timer;
 
 // Some traits we need
 use embedded_hal::digital::v2::OutputPin;
@@ -91,7 +91,7 @@ fn main() -> ! {
         &mut pac.RESETS,
         clocks.peripheral_clock.freq(),
         2_500_000u32.Hz(),
-        &embedded_hal::spi::MODE_3,
+        &embedded_hal::spi::MODE_0,
     );
  
     let mut dc_pin = pins.gpio20.into_push_pull_output();
@@ -99,15 +99,35 @@ fn main() -> ! {
     let mut reset_pin = pins.gpio21.into_push_pull_output();
 
     let mut display = Uc8151::new(spi, spi_cs, dc_pin, busy_pin, reset_pin);
+    
+    display.enable();
+    display.setup(&mut delay, uc8151::LUT::Normal);
 
     // Configure GPIO25 as an output
     let mut led_pin = pins.gpio25.into_push_pull_output();
     loop {
         led_pin.set_high().unwrap();
+        
+        for y in 0..100 {
+            for x in 0..100 {
+                display.pixel(x,y,true);
+            }
+        }
+        display.pixel(0,0,true);
+        delay.delay_ms(100);
+        display.update().unwrap();
         // TODO: Replace with proper 1s delays once we have clocks working
-        delay.delay_ms(1000);
+        delay.delay_ms(10000);
+        
         led_pin.set_low().unwrap();
-        delay.delay_ms(1000);
+        for y in 0..100 {
+            for x in 0..100 {
+                display.pixel(x,y,false);
+            }
+        }
+        delay.delay_ms(100);
+        display.update().unwrap();
+        delay.delay_ms(10000);
     }
 }
 
