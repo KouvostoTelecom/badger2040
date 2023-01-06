@@ -95,7 +95,7 @@ fn main() -> ! {
     );
 
     let mut dc_pin = pins.gpio20.into_push_pull_output();
-    let mut busy_pin = pins.gpio26.into_bus_keep_input();
+    let mut busy_pin = pins.gpio26.into_floating_input();
     let mut reset_pin = pins.gpio21.into_push_pull_output();
 
     let mut led_pin = pins.gpio25.into_push_pull_output();
