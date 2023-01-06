@@ -45,13 +45,13 @@ use uc8151::Uc8151;
 /// if your board has a different frequency
 const XTAL_FREQ_HZ: u32 = 12_000_000u32;
 
-
 use embedded_graphics::{
     image::{Image, ImageRaw},
+    mono_font::{ascii::FONT_10X20, ascii::FONT_6X10, MonoTextStyle},
     pixelcolor::BinaryColor,
     prelude::*,
+    text::{Alignment, Text},
 };
-
 
 #[rustfmt::skip]
 const DATA: &[u8] = &[
@@ -61,7 +61,6 @@ const DATA: &[u8] = &[
     0b10101001, 0b0100_0000,
     0b11001011, 0b0100_0000,
 ];
-
 
 #[entry]
 fn main() -> ! {
@@ -111,45 +110,35 @@ fn main() -> ! {
         2_500_000u32.Hz(),
         &embedded_hal::spi::MODE_0,
     );
- 
+
     let mut dc_pin = pins.gpio20.into_push_pull_output();
     let mut busy_pin = pins.gpio26.into_bus_keep_input();
     let mut reset_pin = pins.gpio21.into_push_pull_output();
 
     let mut display = Uc8151::new(spi, spi_cs, dc_pin, busy_pin, reset_pin);
-    
-    display.enable();
-    display.setup(&mut delay, uc8151::LUT::Normal);
 
-    let raw_image = ImageRaw::<BinaryColor>::new(DATA, 12);
-    let image = Image::new(&raw_image, Point::zero());
+    display.enable();
+    display.setup(&mut delay, uc8151::LUT::Fast).unwrap();
+
+    let style = MonoTextStyle::new(&FONT_10X20, BinaryColor::Off);
+
+    Text::with_alignment(
+        "KYBERHAX0R 3000",
+        Point::new((uc8151::WIDTH / 2) as i32, (uc8151::HEIGHT / 2) as i32),
+        style,
+        Alignment::Center,
+    )
+    .draw(&mut display)
+    .unwrap();
 
     // Configure GPIO25 as an output
     let mut led_pin = pins.gpio25.into_push_pull_output();
-    loop {
-        led_pin.set_high().unwrap();
-        
-        for y in 0..100 {
-            for x in 0..100 {
-                display.pixel(x,y,true);
-            }
-        }
-        display.pixel(0,0,true);
-        delay.delay_ms(100);
-        display.update().unwrap();
-        // TODO: Replace with proper 1s delays once we have clocks working
-        delay.delay_ms(10000);
-        
-        led_pin.set_low().unwrap();
-        for y in 0..100 {
-            for x in 0..100 {
-                display.pixel(x,y,true);
-            }
-        }
-        
-        image.draw(&mut display).unwrap();
+    led_pin.set_high().unwrap();
 
-        display.update().unwrap();
+    display.update().unwrap();
+    led_pin.set_low().unwrap();
+
+    loop {
         delay.delay_ms(20000);
     }
 }
