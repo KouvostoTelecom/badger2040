@@ -21,6 +21,7 @@ use pimoroni_badger2040::hal::pac;
 use uc8151::Uc8151;
 
 // Graphics library
+
 use embedded_graphics::{
     mono_font::{ascii::FONT_10X20, MonoTextStyle},
     pixelcolor::BinaryColor,
@@ -28,6 +29,7 @@ use embedded_graphics::{
     primitives::{PrimitiveStyleBuilder, StrokeAlignment::Outside},
     text::{Alignment, Text},
 };
+
 // endregion
 
 // region: embedded_graphics extensions
