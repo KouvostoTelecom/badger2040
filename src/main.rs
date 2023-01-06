@@ -11,6 +11,7 @@
 
 use fugit::RateExtU32;
 
+use hal::gpio::{Floating, Function, Input, Output, Pin, PushPull, Spi};
 use pimoroni_badger2040::entry;
 // Ensure we halt the program on panic (if we don't mention this crate it won't
 // be linked)
@@ -27,9 +28,6 @@ use pimoroni_badger2040::hal::Timer;
 // Some traits we need
 use embedded_hal::digital::v2::OutputPin;
 use rp2040_hal::clocks::Clock;
-
-use rp2040_hal::gpio::FunctionSpi;
-//use rp2040_hal::spi::Spi;
 
 use uc8151::Uc8151;
 
@@ -90,30 +88,30 @@ fn main() -> ! {
     let sio = hal::Sio::new(pac.SIO);
 
     // Set the pins to their default state
-    let pins = hal::gpio::Pins::new(
+    let pins = pimoroni_badger2040::Pins::new(
         pac.IO_BANK0,
         pac.PADS_BANK0,
         sio.gpio_bank0,
         &mut pac.RESETS,
     );
 
-    let _sclk = pins.gpio18.into_mode::<FunctionSpi>(); // sclk
-    let _miso = pins.gpio16.into_mode::<FunctionSpi>(); // miso
-    let _mosi = pins.gpio19.into_mode::<FunctionSpi>(); // mosi
-    let spi_cs = pins.gpio17.into_push_pull_output();
+    let _sclk: Pin<_, Function<Spi>> = pins.sclk.into_mode();
+    let _miso: Pin<_, Function<Spi>> = pins.miso.into_mode();
+    let _mosi: Pin<_, Function<Spi>> = pins.mosi.into_mode();
+    let spi_cs: Pin<_, Output<PushPull>> = pins.inky_cs_gpio.into_mode();
 
     let spi = hal::Spi::<_, _, 8>::new(pac.SPI0);
 
     let spi = spi.init(
         &mut pac.RESETS,
         clocks.peripheral_clock.freq(),
-        2_500_000u32.Hz(),
+        50_000_000u32.Hz(),
         &embedded_hal::spi::MODE_0,
     );
 
-    let mut dc_pin = pins.gpio20.into_push_pull_output();
-    let mut busy_pin = pins.gpio26.into_floating_input();
-    let mut reset_pin = pins.gpio21.into_push_pull_output();
+    let dc_pin: Pin<_, Output<PushPull>> = pins.inky_dc.into_mode();
+    let reset_pin: Pin<_, Output<PushPull>> = pins.inky_res.into_mode();
+    let busy_pin: Pin<_, Input<Floating>> = pins.inky_busy.into_mode();
 
     let mut display = Uc8151::new(spi, spi_cs, dc_pin, busy_pin, reset_pin);
 
@@ -132,7 +130,7 @@ fn main() -> ! {
     .unwrap();
 
     // Configure GPIO25 as an output
-    let mut led_pin = pins.gpio25.into_push_pull_output();
+    let mut led_pin = pins.led.into_push_pull_output();
     led_pin.set_high().unwrap();
 
     display.update().unwrap();
