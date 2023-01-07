@@ -37,4 +37,5 @@ dht-sensor = "0.2.1"
 uc8151 = "0.1.4"
 pimoroni_badger2040 = "0.3.0"
 embedded-graphics = "0.7.1"
+heapless = { version = "0.7.16" }
 

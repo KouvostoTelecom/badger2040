@@ -29,7 +29,7 @@ use embedded_graphics::{
             FONT_7X13_ITALIC, FONT_7X14, FONT_7X14_BOLD, FONT_8X13, FONT_8X13_BOLD,
             FONT_8X13_ITALIC, FONT_9X15, FONT_9X15_BOLD, FONT_9X18, FONT_9X18_BOLD,
         },
-        MonoFont, MonoTextStyle,
+        MonoTextStyle,
     },
     pixelcolor::BinaryColor,
     prelude::*,
@@ -38,7 +38,10 @@ use embedded_graphics::{
 };
 // endregion
 
-const FONTS: [(&str, &MonoFont<'static>); 22] = [
+use core::fmt::Write;
+use heapless::String;
+
+const FONTS: [(&str, &embedded_graphics::mono_font::MonoFont<'static>); 22] = [
     ("FONT_4X6", &FONT_4X6),
     ("FONT_5X7", &FONT_5X7),
     ("FONT_5X8", &FONT_5X8),
@@ -140,11 +143,14 @@ fn main() -> ! {
 
     let screen_center = Point::new((uc8151::WIDTH / 2) as i32, (uc8151::HEIGHT / 2) as i32);
     loop {
+        let mut count = 0;
         for (font_name, font_type) in FONTS.iter() {
+            count += 1;
             let style_black = MonoTextStyle::new(font_type, BinaryColor::Off);
+            let mut s: String<30> = String::from("Font ");
+            write!(s, "{}/{}\n{}", count, FONTS.len(), font_name).unwrap();
 
-            let text =
-                Text::with_alignment(font_name, Point::new(0, 0), style_black, Alignment::Center);
+            let text = Text::with_alignment(&s, Point::new(0, 0), style_black, Alignment::Center);
 
             let text = text.center(screen_center);
 
