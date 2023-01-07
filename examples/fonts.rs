@@ -1,4 +1,5 @@
 //! # Rust Badge for badger2040
+//! # This example demonstrates: fonts, random and string formatting
 
 // region: imports and boilerplate
 #![no_std]
@@ -40,6 +41,7 @@ use embedded_graphics::{
 
 use core::fmt::Write;
 use heapless::String;
+use rand::prelude::*;
 
 const FONTS: [(&str, &embedded_graphics::mono_font::MonoFont<'static>); 22] = [
     ("FONT_4X6", &FONT_4X6),
@@ -140,6 +142,7 @@ fn main() -> ! {
         .build();
 
     let mut led: Pin<_, Output<PushPull>> = pins.led.into_mode();
+    let mut rng = SmallRng::seed_from_u64(12345678);
 
     let screen_center = Point::new((uc8151::WIDTH / 2) as i32, (uc8151::HEIGHT / 2) as i32);
     loop {
@@ -152,7 +155,9 @@ fn main() -> ! {
 
             let text = Text::with_alignment(&s, Point::new(0, 0), style_black, Alignment::Center);
 
-            let text = text.center(screen_center);
+            let text = text.center(
+                screen_center + Point::new(rng.gen_range(-100..100), rng.gen_range(-50..50)),
+            );
 
             text.bounding_box()
                 .into_styled(box_style)
