@@ -13,11 +13,10 @@ use fugit::RateExtU32;
 use rp2040_hal::clocks::Clock;
 
 // Hardware
-use hal::gpio::{Floating, Function, Input, Output, Pin, PushPull, Spi};
-
-use pimoroni_badger2040::entry;
-use pimoroni_badger2040::hal;
-use pimoroni_badger2040::hal::pac;
+use badger2040::bsp;
+use bsp::entry;
+use bsp::hal;
+use bsp::hal::pac;
 use uc8151::Uc8151;
 
 #[entry]
@@ -28,7 +27,7 @@ fn main() -> ! {
     let mut watchdog = hal::Watchdog::new(pac.WATCHDOG);
 
     let clocks = hal::clocks::init_clocks_and_plls(
-        pimoroni_badger2040::XOSC_CRYSTAL_FREQ,
+        bsp::XOSC_CRYSTAL_FREQ,
         pac.XOSC,
         pac.CLOCKS,
         pac.PLL_SYS,
@@ -43,17 +42,16 @@ fn main() -> ! {
 
     let sio = hal::Sio::new(pac.SIO);
 
-    let pins = pimoroni_badger2040::Pins::new(
+    let pins = bsp::Pins::new(
         pac.IO_BANK0,
         pac.PADS_BANK0,
         sio.gpio_bank0,
         &mut pac.RESETS,
     );
 
-    let _sclk: Pin<_, Function<Spi>> = pins.sclk.into_mode();
-    let _miso: Pin<_, Function<Spi>> = pins.miso.into_mode();
-    let _mosi: Pin<_, Function<Spi>> = pins.mosi.into_mode();
-    let spi_cs: Pin<_, Output<PushPull>> = pins.inky_cs_gpio.into_mode();
+    let _sclk: bsp::Sclk = pins.sclk.into_mode();
+    let _miso: bsp::Miso = pins.miso.into_mode();
+    let _mosi: bsp::Mosi = pins.mosi.into_mode();
 
     let spi = hal::Spi::<_, _, 8>::new(pac.SPI0);
 
@@ -64,9 +62,10 @@ fn main() -> ! {
         &embedded_hal::spi::MODE_0,
     );
 
-    let dc_pin: Pin<_, Output<PushPull>> = pins.inky_dc.into_mode();
-    let reset_pin: Pin<_, Output<PushPull>> = pins.inky_res.into_mode();
-    let busy_pin: Pin<_, Input<Floating>> = pins.inky_busy.into_mode();
+    let dc_pin: bsp::InkyDc = pins.inky_dc.into_mode();
+    let reset_pin: bsp::InkyReset = pins.inky_res.into_mode();
+    let busy_pin: bsp::InkyBusy = pins.inky_busy.into_mode();
+    let spi_cs: bsp::InkyCs = pins.inky_cs_gpio.into_mode();
 
     let mut display = Uc8151::new(spi, spi_cs, dc_pin, busy_pin, reset_pin);
 

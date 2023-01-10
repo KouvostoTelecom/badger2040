@@ -15,9 +15,11 @@ use rp2040_hal::clocks::Clock;
 // Hardware
 use hal::gpio::{Floating, Function, Input, Output, Pin, PushPull, Spi};
 
-use pimoroni_badger2040::entry;
-use pimoroni_badger2040::hal;
-use pimoroni_badger2040::hal::pac;
+use badger2040::bsp;
+
+use bsp::entry;
+use bsp::hal;
+use bsp::hal::pac;
 use uc8151::Uc8151;
 
 // Graphics library
@@ -41,7 +43,7 @@ fn main() -> ! {
     let core = pac::CorePeripherals::take().unwrap();
     let mut watchdog = hal::Watchdog::new(pac.WATCHDOG);
     let clocks = hal::clocks::init_clocks_and_plls(
-        pimoroni_badger2040::XOSC_CRYSTAL_FREQ,
+        bsp::XOSC_CRYSTAL_FREQ,
         pac.XOSC,
         pac.CLOCKS,
         pac.PLL_SYS,
@@ -56,7 +58,7 @@ fn main() -> ! {
 
     let sio = hal::Sio::new(pac.SIO);
 
-    let pins = pimoroni_badger2040::Pins::new(
+    let pins = bsp::Pins::new(
         pac.IO_BANK0,
         pac.PADS_BANK0,
         sio.gpio_bank0,
