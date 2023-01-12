@@ -92,7 +92,7 @@ fn main() -> ! {
     let mut display = Uc8151::new(spi, spi_cs, dc_pin, busy_pin, reset_pin);
 
     display.enable();
-    display.setup(&mut delay, uc8151::LUT::Fast).unwrap();
+    display.setup(&mut delay, uc8151::LUT::Normal).unwrap();
 
     let style_black = MonoTextStyle::new(&FONT_10X20, BinaryColor::Off);
     let box_style = PrimitiveStyleBuilder::new()
@@ -114,9 +114,14 @@ fn main() -> ! {
     image.center_mut(screen_center);
 
     image.draw(&mut display).unwrap();
-    display.update().unwrap();
 
+    led.set_low().unwrap();
+
+    for i in 0..40{
+        display.update().unwrap();
+    }
+    
     loop {
-        delay.delay_ms(10000);
+        led.set_high().unwrap();
     }
 }
