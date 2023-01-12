@@ -39,4 +39,5 @@ pimoroni_badger2040 = "0.3.0"
 embedded-graphics = "0.7.1"
 heapless = { version = "0.7.16" }
 rand = { version = "0.8.5", default-features = false, features = ["small_rng"] }
+tinybmp = "0.4.0"
 
