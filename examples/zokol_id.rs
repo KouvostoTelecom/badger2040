@@ -121,6 +121,12 @@ fn main() -> ! {
 
     let text = text.center(screen_center);
 
+    led.set_low().unwrap();
+
+    for i in 0..5{
+        display.update().unwrap();
+    }
+
     Image::new(&avatar, Point::new(0, 0)).draw(&mut display).unwrap();
     Image::new(&koteco, Point::new(175, 0)).draw(&mut display).unwrap();
 
@@ -130,11 +136,7 @@ fn main() -> ! {
         .unwrap();
     text.draw(&mut display).unwrap();
 
-    led.set_low().unwrap();
-
-    for i in 0..40{
-        display.update().unwrap();
-    }
+    display.update().unwrap();
     
     loop {
         led.set_high().unwrap();
