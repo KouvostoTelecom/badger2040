@@ -121,11 +121,13 @@ fn main() -> ! {
 
     let text = text.center(screen_center);
 
-    led.set_low().unwrap();
+    led.set_high().unwrap();
 
+    /*
     for i in 0..5{
         display.update().unwrap();
     }
+    */
 
     Image::new(&avatar, Point::new(0, 0)).draw(&mut display).unwrap();
     Image::new(&koteco, Point::new(175, 0)).draw(&mut display).unwrap();
@@ -137,8 +139,14 @@ fn main() -> ! {
     text.draw(&mut display).unwrap();
 
     display.update().unwrap();
+
+    led.set_low().unwrap();
+
+    //rp2040_hal::xosc::Dormant.into();
     
     loop {
         led.set_high().unwrap();
     }
+
+
 }
