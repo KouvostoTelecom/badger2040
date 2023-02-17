@@ -5,6 +5,7 @@ use embedded_graphics::{
 };
 
 pub trait Centering {
+    #[must_use]
     fn center(&self, at: Point) -> Self;
     fn center_mut(&mut self, at: Point) -> &mut Self;
 }
