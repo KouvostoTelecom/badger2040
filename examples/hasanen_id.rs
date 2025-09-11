@@ -34,7 +34,7 @@ use embedded_graphics::{
 // endregion
 
 // region: embedded_graphics extensions
-use badger2040::graphics_extensions::Centering;
+//use badger2040::graphics_extensions::Centering;
 use tinybmp::Bmp;
 // endregion
 
@@ -101,23 +101,27 @@ fn main() -> ! {
         .build();
 
     let mut led: Pin<_, Output<PushPull>> = pins.led.into_mode();
+    led.set_high().unwrap();
 
     // Text not totally centered so that KTK logo is "complete"
-    let screen_center = Point::new((uc8151::WIDTH / 2) as i32 - 5, (uc8151::HEIGHT / 2) as i32);
+    let text_position = Point::new((uc8151::WIDTH / 3 * 2) as i32, 15);
 
-    let text = Text::with_alignment("hasanen", Point::new(0, 0), style_black, Alignment::Center);
+    let text = Text::with_alignment("hasanen", text_position, style_black, Alignment::Center);
 
+    // width: 102
+    // height: 28
     let avatar_bmp = include_bytes!("../gfx/hasanen.bmp");
-
     let avatar = Bmp::from_slice(avatar_bmp).unwrap();
 
-    let koteco_bmp = include_bytes!("../gfx/koteco_logo.bmp");
+    // width: 80
+    // height: 80
+    let qr_hsm_bmp = include_bytes!("../gfx/qr_horseseamen.bmp");
+    let qr_hsm = Bmp::from_slice(qr_hsm_bmp).unwrap();
 
-    let koteco = Bmp::from_slice(koteco_bmp).unwrap();
-
-    let text = text.center(screen_center);
-
-    led.set_high().unwrap();
+    // width: 80
+    // height: 80
+    let qr_poc_bmp = include_bytes!("../gfx/qr_pieceofcodeblog.bmp");
+    let qr_poc = Bmp::from_slice(qr_poc_bmp).unwrap();
 
     /*
     for i in 0..5{
@@ -128,7 +132,12 @@ fn main() -> ! {
     Image::new(&avatar, Point::new(0, 0))
         .draw(&mut display)
         .unwrap();
-    Image::new(&koteco, Point::new(175, 0))
+
+    Image::new(&qr_hsm, Point::new(110, 33))
+        .draw(&mut display)
+        .unwrap();
+
+    Image::new(&qr_poc, Point::new(201, 33))
         .draw(&mut display)
         .unwrap();
 
@@ -140,11 +149,10 @@ fn main() -> ! {
 
     display.update().unwrap();
 
-    led.set_low().unwrap();
-
-    //rp2040_hal::xosc::Dormant.into();
-
     loop {
+        led.set_low().unwrap();
+        delay.delay_ms(1000);
         led.set_high().unwrap();
+        delay.delay_ms(1000);
     }
 }
